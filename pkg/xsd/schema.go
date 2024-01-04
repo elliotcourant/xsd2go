@@ -163,7 +163,19 @@ func (sch *Schema) encodingXmlImportNeeded() bool {
 }
 
 func (sch *Schema) ExportableElements() []Element {
-	return append(sch.Elements, sch.inlinedElements...)
+	elCache := map[string]bool{}
+	for _, el := range sch.Elements {
+		elCache[el.GoName()] = true
+	}
+
+	var res []Element
+	for _, typ := range append(sch.Elements, sch.inlinedElements...) {
+		_, found := elCache[typ.GoName()]
+		if !found {
+			res = append(res, typ)
+		}
+	}
+	return res
 }
 
 func (sch *Schema) ExportableComplexTypes() []ComplexType {
